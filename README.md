@@ -28,4 +28,4 @@ The tables interface and cpu must be defined:
 
 The JSON repsonse for interface statistics may be different.  Very for 3.2 upgrades.
 
-There is an example dashboard included dashboard-NSX-T EVM Interface Statistics.json
+There is an example dashboard included "dashboard-NSX-T EVM Interface Statistics.json"
