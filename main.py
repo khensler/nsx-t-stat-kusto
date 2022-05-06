@@ -79,12 +79,6 @@ def _getT0LocaleServices(nsxtConnection,path):
     tier0locales = json.loads(_getAPIResults(nsxtConnection=nsxtConnection, uri=path+"/locale-services"))  
     return tier0locales['results'][0]['path']
 
-def getInterfacesStats(tier0interfaces):
-    frames =[]
-    for tier0interface in tier0interfaces:
-        interfaceStats = _getInterfaceStats(tier0interface)
-        frames.append(interfaceStats)
-    return pandas.concat(frames)
 
 def _getInterfaceStats(tier0interface):
     statsuri = tier0interface.path+"/statistics?enforcement_point_path=/infra/sites/default/enforcement-points/default&edge_path="+tier0interface.edge_path
