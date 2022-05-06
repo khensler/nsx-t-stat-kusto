@@ -53,7 +53,7 @@ class NSXEdgeNode:
         nodecpu = json.loads(_getAPIResults(nsxtConnection=self.connection,uri= "/api/v1/transport-nodes/"+self.id+"/node/services/dataplane/cpu-stats",policy=False))
         df = pandas.json_normalize(nodecpu, record_path=['cores'])
         df.columns = df.columns.str.replace('/','_',regex=False)
-        df['precise_timestamp'] = datetime.datetime.now()
+        df['precise_timestamp'] = datetime.datetime.now(tz=datetime.timezone.utc)
         df['t0_name'] = self.display_name
         return df
 
