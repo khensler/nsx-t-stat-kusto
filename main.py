@@ -143,14 +143,17 @@ def main():
     ### Get EVM Transport Nodes ###
     nodes = getEdgeNodes(nsxtConnection=nsxtConnection)
     while True:
-        print("Get Interface Stats")
-        interfacestats = nsxtT0.getInterfacesStats()
-        print("Get CPU Stats")
-        cpustats = getCpuStats(nodes=nodes)
-        print("Ingest Interface Stats")
-        client.ingest_from_dataframe(df=interfacestats,ingestion_properties=interface_ingestion_props)
-        print("Ingest CPU Stats")
-        client.ingest_from_dataframe(df=cpustats,ingestion_properties=cpu_ingestion_props)
+        try:
+            print("Get Interface Stats")
+            interfacestats = nsxtT0.getInterfacesStats()
+            print("Get CPU Stats")
+            cpustats = getCpuStats(nodes=nodes)
+            print("Ingest Interface Stats")
+            client.ingest_from_dataframe(df=interfacestats,ingestion_properties=interface_ingestion_props)
+            print("Ingest CPU Stats")
+            client.ingest_from_dataframe(df=cpustats,ingestion_properties=cpu_ingestion_props)
+        except:
+            continue
         sleep(10)
     return
 
