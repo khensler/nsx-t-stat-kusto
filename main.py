@@ -11,7 +11,7 @@ from azure.kusto.ingest import (
     QueuedIngestClient,
     IngestionProperties
 )
-import urllib3
+import urllib3 
 import os
 
 class NSXTConnection:
