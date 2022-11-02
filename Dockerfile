@@ -1,4 +1,5 @@
 FROM python
+SHELL ["/bin/bash", "-c"]
 COPY requirements.txt ./
 RUN apt-get update && apt-get install build-essential -y
 RUN pip install --no-cache-dir -r requirements.txt
