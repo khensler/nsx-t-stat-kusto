@@ -121,7 +121,10 @@ def main():
         if os.environ['local'] == "True":
             credential = AzureCliCredential()
     except:
-        MSI_credential = ManagedIdentityCredential(client_id=os.environ['client_id'])
+        try:
+            MSI_credential = ManagedIdentityCredential(client_id=os.environ['client_id'])
+        except:
+            MSI_credential = DefaultAzureCredential()
         credential = ChainedTokenCredential(MSI_credential)
     #collect cloud info
     resource_id = os.environ['AVS_CLOUD_ID']
