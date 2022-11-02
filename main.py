@@ -145,7 +145,7 @@ def main():
     os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
     os.environ["REGION"] = region_id
     #start telegraf
-    os.system("systemctl start telegraf")
+    os.system("service telegraf start")
     #connect to nsx-t
     nsxtConnection = NSXTConnection(nsxtUri=nsxUri, nsxtUsername=cloud_credentials.nsxt_username, nsxtPassword=cloud_credentials.nsxt_password)
     ### Get T0s Interfaces ###
