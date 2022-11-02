@@ -1,18 +1,16 @@
-from threading import local
 from urllib import request
 import requests
 import json
 import datetime
-from azure.kusto.data import KustoConnectionStringBuilder
-from azure.kusto.data.data_format import DataFormat
 import pandas
 from time import sleep
-from azure.kusto.ingest import (
-    QueuedIngestClient,
-    IngestionProperties
-)
-import urllib3 
+import urllib3
 import os
+import os.path
+from azure.mgmt.avs import AVSClient
+from azure.identity import DefaultAzureCredential
+from azure.identity import ChainedTokenCredential,ManagedIdentityCredential
+from azure.identity import AzureCliCredential
 
 class NSXTConnection:
     def __init__(self, nsxtUri,nsxtUsername, nsxtPassword):
@@ -63,7 +61,7 @@ def _getT0Interfaces(NSXTTier0):
     for tier0interface in results['results']:
         interfaces.append(NSXTTier0Interface(path = tier0interface['path'], edge_path=tier0interface['edge_path'],T0= NSXTTier0))
     return interfaces
-    
+
 def _getT0(nsxtConnection, id):
     results = json.loads(_getAPIResults(nsxtConnection=nsxtConnection, uri="/infra/tier-0s/"+id))
     return NSXTTier0(path = results['path'], name = results['display_name'], connection=nsxtConnection)
@@ -76,7 +74,7 @@ def getT0s(nsxtConnection):
     return T0s
 
 def _getT0LocaleServices(nsxtConnection,path):
-    tier0locales = json.loads(_getAPIResults(nsxtConnection=nsxtConnection, uri=path+"/locale-services"))  
+    tier0locales = json.loads(_getAPIResults(nsxtConnection=nsxtConnection, uri=path+"/locale-services"))
     return tier0locales['results'][0]['path']
 
 
@@ -84,10 +82,6 @@ def _getInterfaceStats(tier0interface):
     statsuri = tier0interface.path+"/statistics?enforcement_point_path=/infra/sites/default/enforcement-points/default&edge_path="+tier0interface.edge_path
     tier0interfacestats = json.loads(_getAPIResults(nsxtConnection=tier0interface.connection, uri=statsuri))
     df = pandas.json_normalize(tier0interfacestats, record_path=['per_node_statistics'])
-    #df = pandas.json_normalize(tier0interfacestats, record_path=['per_node_statistics'], meta='logical_router_port_id')
-    #cols = df.columns.tolist()
-    #cols = cols[-1:] + cols[:-1]
-    #df = df[cols]
     df.columns = df.columns.str.replace('.','_',regex=False)
     df['precise_timestamp'] = datetime.datetime.fromtimestamp(int(tier0interfacestats['per_node_statistics'][0]['last_update_timestamp'])/1000,tz=datetime.timezone.utc)
     df['t0_name'] = tier0interface.NSXTier0.name
@@ -119,43 +113,88 @@ def _getAPIResults(nsxtConnection, uri,json_body=None, policy = True):
 
 def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    nsxtConnection = NSXTConnection(nsxtUri=os.environ['nsxturi'], nsxtUsername=os.environ['nsxusername'], nsxtPassword=os.environ['nsxpassword'])
-    cluster = os.environ['kustoingesturi']
-    ### Use cli auth if local
-    if os.environ['local'] == "True":
-            kcsb = KustoConnectionStringBuilder.with_az_cli_authentication(cluster)
-    else:
-        kcsb = KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication(cluster)
-    client = QueuedIngestClient(kcsb)
-    database_name = "nsx-t-stats"
-    interface_ingestion_props = IngestionProperties(
-        database=database_name,
-        table="interface",
-        data_format=DataFormat.CSV
-    )
-    cpu_ingestion_props = IngestionProperties(
-        database=database_name,
-        table="cpu",
-        data_format=DataFormat.CSV
-    )
+    #set output files:
+    interface_csv = "interface.csv"
+    cpu_csv = "cpu.csv"
+    #Get Identity
+    try:
+        if os.environ['local'] == "True":
+            credential = AzureCliCredential()
+    except:
+        MSI_credential = ManagedIdentityCredential(client_id=os.environ['client_id'])
+        credential = ChainedTokenCredential(MSI_credential)
+    #collect cloud info
+    resource_id = os.environ['AVS_CLOUD_ID']
+    subscription_id = resource_id[15:resource_id[15:].find("/")+15]
+    avs_client = AVSClient(credential, subscription_id)
+    resource_group_name = resource_id[resource_id.find("resourceGroups/")+15:resource_id.find("/",resource_id.find("resourceGroups/")+15)]
+    private_cloud_name = resource_id[resource_id.find("privateClouds/")+14:]
+    print("Subscription Id: {}\r\nResource Group Name: {}\r\nCloud Name: {}".format(subscription_id,resource_group_name,private_cloud_name))
+    #get cloud object
+    cloud = avs_client.private_clouds.get(resource_group_name=resource_group_name,private_cloud_name=private_cloud_name)
+    #colllect more info
+    region_id = cloud.location
+    nsxUri= cloud.endpoints.nsxt_manager[:-1]
+    cloud_credentials = avs_client.private_clouds.list_admin_credentials(resource_group_name, cloud.name)
+    #set env for telegraf
+    os.environ["VCSA_URI"] = cloud.endpoints.vcsa
+    os.environ["VCSA_USER"] = cloud_credentials.vcenter_username
+    os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
+    os.environ["REGION"] = region_id
+    #start telegraf
+    os.system("systemctl start telegraf")
+    #connect to nsx-t
+    nsxtConnection = NSXTConnection(nsxtUri=nsxUri, nsxtUsername=cloud_credentials.nsxt_username, nsxtPassword=cloud_credentials.nsxt_password)
     ### Get T0s Interfaces ###
     nsxtT0  = getT0s(nsxtConnection=nsxtConnection)[0]
     ### Get EVM Transport Nodes ###
     nodes = getEdgeNodes(nsxtConnection=nsxtConnection)
+    count=0
+    #main loop
     while True:
         try:
-            print("Get Interface Stats")
+            # get stats
             interfacestats = nsxtT0.getInterfacesStats()
-            print("Get CPU Stats")
             cpustats = getCpuStats(nodes=nodes)
-            print("Ingest Interface Stats")
-            client.ingest_from_dataframe(df=interfacestats,ingestion_properties=interface_ingestion_props)
-            print("Ingest CPU Stats")
-            client.ingest_from_dataframe(df=cpustats,ingestion_properties=cpu_ingestion_props)
-        except:
-            continue
-        sleep(10)
+            #check to make sure old dataframe exists
+            if (count == 1):
+                #create new frame for delta values
+                delta_frame = pandas.DataFrame(columns= interfacestats.columns)
+                #loop through rows
+                for index, row in interfacestats.iterrows():
+                    #find coresponding row in old
+                    df2row = interfacestatsold.loc[interfacestatsold['t0_interface']==row['t0_interface']]
+                    #add new row to delta
+                    delta_frame = delta_frame.append(pandas.Series(),ignore_index=True)
+                    #loop through cols
+                    for col_name, value in row.iteritems():
+                        #try to set numerical value.  on error assum string
+                        try:
+                            elapsed_s = (int(df2row['last_update_timestamp'])-int(row['last_update_timestamp']))/1000
+                            delta_frame.loc[len(delta_frame.index)-1][col_name]=(int(df2row[col_name])-int(row[col_name]))/elapsed_s
+                        except:
+                            delta_frame.loc[len(delta_frame.index)-1][col_name]=value
+                #write to disk with header if new append if exists
+                if os.path.isfile(interface_csv):
+                    delta_frame.to_csv(interface_csv, index=False, mode="a",header=False)
+                else:
+                    delta_frame.to_csv(interface_csv, index=False, mode="a",header=True)
+                if os.path.isfile(cpu_csv):
+                    cpustats.to_csv(cpu_csv, index=False,mode="a",header=False)
+                else:
+                    cpustats.to_csv(cpu_csv, index=False,mode="a",header=True)
+                #make copy of frame for next lop
+                interfacestatsold = interfacestats.copy(deep=True)
+            else:
+                #make old frame if not exiting
+                interfacestatsold = interfacestats.copy(deep=True)
+        except Exception as e:
+            print(e)
+            break
+        #set 1 after first run
+        count = 1
+        #sleep for 60 seconds
+        sleep(60)
     return
-
 if __name__ == '__main__':
     main()
