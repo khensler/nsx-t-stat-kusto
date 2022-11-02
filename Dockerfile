@@ -1,5 +1,6 @@
-FROM ubunutu
+FROM python
 COPY requirements.txt ./
+RUN apt install build-essential
 RUN pip install --no-cache-dir -r requirements.txt
 RUN wget -qO- https://repos.influxdata.com/influxdb.key | tee /etc/apt/trusted.gpg.d/influxdb.asc >/dev/null
 RUN source /etc/os-release
