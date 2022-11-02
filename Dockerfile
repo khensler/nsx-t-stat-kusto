@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM ubunutu
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 RUN wget -qO- https://repos.influxdata.com/influxdb.key | tee /etc/apt/trusted.gpg.d/influxdb.asc >/dev/null
