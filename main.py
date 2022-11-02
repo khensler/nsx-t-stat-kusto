@@ -114,14 +114,14 @@ def _getAPIResults(nsxtConnection, uri,json_body=None, policy = True):
 def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     #set output files:
-    interface_csv = "interface.csv"
-    cpu_csv = "cpu.csv"
+    interface_csv = "/root/interface.csv"
+    cpu_csv = "/root/cpu.csv"
     #Get Identity
     try:
         if os.environ['local'] == "True":
             credential = AzureCliCredential()
     except:
-        MSI_credential = ManagedIdentityCredential()
+        MSI_credential = ManagedIdentityCredential(client_id=os.environ['client_id'])
         credential = ChainedTokenCredential(MSI_credential)
     #collect cloud info
     resource_id = os.environ['AVS_CLOUD_ID']
