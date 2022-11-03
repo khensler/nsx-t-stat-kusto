@@ -33,7 +33,7 @@ cd $install_path
 python3 -m venv venv
 source ./venv/bin/activate
 python3 -m pip install -r requirements.txt
-sed -i "s~/##WORKINGDIR##~$install_path~" nsx-stat.service
+sed -i "s~##WORKINGDIR##~$install_path~" nsx-stat.service
 sed -i "s~##CLOUDID##~$cloud_id~" nsx-stat.service
 cp nsx-stat.service /etc/systemd/system/
 systemctl daemon-reload
