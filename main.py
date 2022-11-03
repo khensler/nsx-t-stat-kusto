@@ -12,7 +12,6 @@ from azure.identity import DefaultAzureCredential
 from azure.identity import ChainedTokenCredential,ManagedIdentityCredential
 from azure.identity import AzureCliCredential
 import logging
-from daemonize import Daemonize
 
 pid = "/tmp/nsx-stats.pid"
 logger = logging.getLogger(__name__)
@@ -180,7 +179,7 @@ def main():
                     #find coresponding row in old
                     df2row = interfacestatsold.loc[interfacestatsold['t0_interface']==row['t0_interface']]
                     #add new row to delta
-                    delta_frame = delta_frame.append(pandas.Series(),ignore_index=True,dtype='float64')
+                    delta_frame = delta_frame.append(pandas.Series(dtype='float64'),ignore_index=True)
                     #loop through cols
                     for col_name, value in row.iteritems():
                         #try to set numerical value.  on error assum string

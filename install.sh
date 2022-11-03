@@ -21,15 +21,18 @@ wget -qO- https://repos.influxdata.com/influxdb.key | tee /etc/apt/trusted.gpg.d
 source /etc/os-release && echo "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" | tee /etc/apt/sources.list.d/influxdb.list
 apt-get update && apt-get install telegraf
 service telegraf stop
-echo AVS_CLOUD_ID=$cloud_id > $install_path/.env
 mkdir $install_path
+echo "AVS_CLOUD_ID=$c" > $install_path/.env
 cp main.py $install_path
 cp requirements.txt $install_path
 cp telegraf.conf $install_path
+cp nsx-stat.service $install_path
+cp start.sh $install_path
+chmod +x $install_path/start.sh
 cd $install_path
 python3 -m venv venv
 source ./venv/bin/activate
-python3 -m pip install -r requirements
+python3 -m pip install -r requirements.txt
 sed -i "s~/##WORKINGDIR##~$install_path~" nsx-stat.service
 cp nsx-stat.service /etc/systemd/system/
 systemctl daemon-reload
