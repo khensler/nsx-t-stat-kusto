@@ -19,9 +19,9 @@ done
 
 wget -qO- https://repos.influxdata.com/influxdb.key | tee /etc/apt/trusted.gpg.d/influxdb.asc >/dev/null
 source /etc/os-release && echo "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" | tee /etc/apt/sources.list.d/influxdb.list
-apt-get update && apt-get install telegraf
+apt-get update && apt-get install telegraf -y
 service telegraf stop
-apt install python3.10-venv
+apt install python3.10-venv -y
 mkdir $install_path
 #echo "AVS_CLOUD_ID=$cloud_id" > $install_path/.env
 cp main.py $install_path

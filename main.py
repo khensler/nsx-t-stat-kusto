@@ -162,6 +162,7 @@ def main():
     os.system('systemctl import-environment VCSA_USER')
     os.system('systemctl import-environment VCSA_PASS')
     os.system('systemctl import-environment REGION')
+    os.system('systemctl import-environment AVS_CLOUD_ID')
     os.system("systemctl start telegraf")
     sleep(10)
     os.system('systemctl import-environment VCSA_PASS=GONE')
