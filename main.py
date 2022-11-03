@@ -151,12 +151,18 @@ def main():
     nsxUri= cloud.endpoints.nsxt_manager[:-1]
     cloud_credentials = avs_client.private_clouds.list_admin_credentials(resource_group_name, cloud.name)
     #set env for telegraf
-    os.environ["VCSA_URI"] = cloud.endpoints.vcsa
-    os.environ["VCSA_USER"] = cloud_credentials.vcenter_username
-    os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
-    os.environ["REGION"] = region_id
-    #start telegraf
-    #os.system("service telegraf start")
+    #os.environ["VCSA_URI"] = cloud.endpoints.vcsa
+    #os.environ["VCSA_USER"] = cloud_credentials.vcenter_username
+    #os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
+    #os.environ["REGION"] = region_id
+    os.system("service telegraf stop")
+    #set telegraf vars
+    os.system('echo "{}" systemd-creds encrypt --name=VCSA_PASS -p - - > /etc/systemd/system/telegraf.service.d/50-password.conf'.format(cloud_credentials.vcenter_password))
+    os.system('echo "{}" systemd-creds encrypt --name=VCSA_USER -p - - > /etc/systemd/system/telegraf.service.d/50-user.conf'.format(cloud_credentials.vcenter_username))
+    os.system('echo "{}" systemd-creds encrypt --name=VCSA_URI -p - - > /etc/systemd/system/telegraf.service.d/50-host.conf'.format(cloud.endpoints.vcsa))
+    os.system('echo "{}" systemd-creds encrypt --name=REGION -p - - > /etc/systemd/system/telegraf.service.d/50-host.conf'.format(region_id))
+    os.system('echo "{}" systemd-creds encrypt --name=AVS_CLOUD_ID -p - - > /etc/systemd/system/telegraf.service.d/50-host.conf'.format(resource_id))
+    os.system("service telegraf start")
     #connect to nsx-t
     nsxtConnection = NSXTConnection(nsxtUri=nsxUri, nsxtUsername=cloud_credentials.nsxt_username, nsxtPassword=cloud_credentials.nsxt_password)
     ### Get T0s Interfaces ###
