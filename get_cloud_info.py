@@ -19,11 +19,11 @@ cloud = avs_client.private_clouds.get(resource_group_name=resource_group_name,pr
 #colllect more info
 region_id = cloud.location
 cloud_credentials = avs_client.private_clouds.list_admin_credentials(resource_group_name, cloud.name)
-if (sys.argv[0] == "user"):
+if (sys.argv[1] == "user"):
     print(cloud_credentials.vcenter_username)
-if (sys.argv[0] == "pass"):
+if (sys.argv[1] == "pass"):
     print(cloud_credentials.vcenter_password)
-if (sys.argv[0] == "ip"):
+if (sys.argv[1] == "ip"):
     print(cloud_credentials.vcsa)
-if (sys.argv[0] == "region"):
+if (sys.argv[1] == "region"):
     print(region_id)
