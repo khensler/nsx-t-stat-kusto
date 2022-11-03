@@ -24,6 +24,6 @@ if (sys.argv[1] == "user"):
 if (sys.argv[1] == "pass"):
     print(cloud_credentials.vcenter_password)
 if (sys.argv[1] == "ip"):
-    print(cloud_credentials.vcsa)
+    print(cloud.endpoints.vcsa)
 if (sys.argv[1] == "region"):
     print(region_id)

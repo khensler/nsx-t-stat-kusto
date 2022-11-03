@@ -148,22 +148,23 @@ def main():
     cloud = avs_client.private_clouds.get(resource_group_name=resource_group_name,private_cloud_name=private_cloud_name)
     #colllect more info
     region_id = cloud.location
+    
     nsxUri= cloud.endpoints.nsxt_manager[:-1]
     cloud_credentials = avs_client.private_clouds.list_admin_credentials(resource_group_name, cloud.name)
-    #set env for telegraf
-    #os.environ["VCSA_URI"] = cloud.endpoints.vcsa
-    #os.environ["VCSA_USER"] = cloud_credentials.vcenter_username
-    #os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
-    #os.environ["REGION"] = region_id
-    os.system("service telegraf stop")
+     #set env for telegraf
+    os.environ["VCSA_URI"] = cloud.endpoints.vcsa
+    os.environ["VCSA_USER"] = cloud_credentials.vcenter_username
+    os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
+    os.environ["REGION"] = region_id
+    os.system("systemctl stop telegraf")
     #set telegraf vars
-    os.system('mkdir /lib/systemd/system/telegraf.service.d')
-    os.system('echo "{}" | systemd-creds encrypt --name=VCSA_PASS -p - - > /lib/systemd/system/telegraf.service.d/50-password.conf'.format(cloud_credentials.vcenter_password))
-    os.system('echo "{}" | systemd-creds encrypt --name=VCSA_USER -p - - > /lib/systemd/system/telegraf.service.d/50-user.conf'.format(cloud_credentials.vcenter_username))
-    os.system('echo "{}" | systemd-creds encrypt --name=VCSA_URI -p - - > /lib/systemd/system/telegraf.service.d/50-host.conf'.format(cloud.endpoints.vcsa))
-    os.system('echo "{}" | systemd-creds encrypt --name=REGION -p - - > /lib/systemd/system/telegraf.service.d/50-host.conf'.format(region_id))
-    os.system('echo "{}" | systemd-creds encrypt --name=AVS_CLOUD_ID -p - - > /lib/systemd/system/telegraf.service.d/50-host.conf'.format(resource_id))
-    os.system("service telegraf start")
+    os.system('systemctl import-environment VCSA_URI')
+    os.system('systemctl import-environment VCSA_USER')
+    os.system('systemctl import-environment VCSA_PASS')
+    os.system('systemctl import-environment REGION')
+    os.system("systemctl start telegraf")
+    sleep(10)
+    os.system('systemctl import-environment VCSA_PASS=GONE')
     #connect to nsx-t
     nsxtConnection = NSXTConnection(nsxtUri=nsxUri, nsxtUsername=cloud_credentials.nsxt_username, nsxtPassword=cloud_credentials.nsxt_password)
     ### Get T0s Interfaces ###
