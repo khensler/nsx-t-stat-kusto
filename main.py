@@ -11,6 +11,17 @@ from azure.mgmt.avs import AVSClient
 from azure.identity import DefaultAzureCredential
 from azure.identity import ChainedTokenCredential,ManagedIdentityCredential
 from azure.identity import AzureCliCredential
+import logging
+from daemonize import Daemonize
+
+pid = "/tmp/nsx-stats.pid"
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+fh = logging.FileHandler("/var/log/nsx-stats.log", "w")
+fh.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+keep_fds = [fh.stream.fileno()]
 
 class NSXTConnection:
     def __init__(self, nsxtUri,nsxtUsername, nsxtPassword):
@@ -114,8 +125,8 @@ def _getAPIResults(nsxtConnection, uri,json_body=None, policy = True):
 def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     #set output files:
-    interface_csv = "/root/interface.csv"
-    cpu_csv = "/root/cpu.csv"
+    interface_csv = "./interface.csv"
+    cpu_csv = "./cpu.csv"
     #Get Identity
     try:
         if os.environ['local'] == "True":
@@ -133,6 +144,7 @@ def main():
     resource_group_name = resource_id[resource_id.find("resourceGroups/")+15:resource_id.find("/",resource_id.find("resourceGroups/")+15)]
     private_cloud_name = resource_id[resource_id.find("privateClouds/")+14:]
     print("Subscription Id: {}\r\nResource Group Name: {}\r\nCloud Name: {}".format(subscription_id,resource_group_name,private_cloud_name))
+    logger.debug("Subscription Id: {}\r\nResource Group Name: {}\r\nCloud Name: {}".format(subscription_id,resource_group_name,private_cloud_name))
     #get cloud object
     cloud = avs_client.private_clouds.get(resource_group_name=resource_group_name,private_cloud_name=private_cloud_name)
     #colllect more info
@@ -145,7 +157,7 @@ def main():
     os.environ["VCSA_PASS"] = cloud_credentials.vcenter_password
     os.environ["REGION"] = region_id
     #start telegraf
-    os.system("service telegraf start")
+    #os.system("service telegraf start")
     #connect to nsx-t
     nsxtConnection = NSXTConnection(nsxtUri=nsxUri, nsxtUsername=cloud_credentials.nsxt_username, nsxtPassword=cloud_credentials.nsxt_password)
     ### Get T0s Interfaces ###
@@ -168,7 +180,7 @@ def main():
                     #find coresponding row in old
                     df2row = interfacestatsold.loc[interfacestatsold['t0_interface']==row['t0_interface']]
                     #add new row to delta
-                    delta_frame = delta_frame.append(pandas.Series(),ignore_index=True)
+                    delta_frame = delta_frame.append(pandas.Series(),ignore_index=True,dtype='float64')
                     #loop through cols
                     for col_name, value in row.iteritems():
                         #try to set numerical value.  on error assum string
@@ -193,11 +205,14 @@ def main():
                 interfacestatsold = interfacestats.copy(deep=True)
         except Exception as e:
             print(e)
+            logger.debug(e)
             break
         #set 1 after first run
         count = 1
         #sleep for 60 seconds
         sleep(60)
     return
+
+
 if __name__ == '__main__':
     main()
