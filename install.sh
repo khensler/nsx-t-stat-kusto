@@ -22,7 +22,7 @@ source /etc/os-release && echo "deb https://repos.influxdata.com/${ID} ${VERSION
 apt-get update && apt-get install telegraf
 service telegraf stop
 mkdir $install_path
-echo "AVS_CLOUD_ID=$c" > $install_path/.env
+echo "AVS_CLOUD_ID=$cloud_id" > $install_path/.env
 cp main.py $install_path
 cp requirements.txt $install_path
 cp telegraf.conf $install_path
