@@ -22,7 +22,7 @@ source /etc/os-release && echo "deb https://repos.influxdata.com/${ID} ${VERSION
 apt-get update && apt-get install telegraf
 service telegraf stop
 mkdir $install_path
-echo "AVS_CLOUD_ID=$cloud_id" > $install_path/.env
+#echo "AVS_CLOUD_ID=$cloud_id" > $install_path/.env
 cp main.py $install_path
 cp requirements.txt $install_path
 cp telegraf.conf $install_path
@@ -34,6 +34,7 @@ python3 -m venv venv
 source ./venv/bin/activate
 python3 -m pip install -r requirements.txt
 sed -i "s~/##WORKINGDIR##~$install_path~" nsx-stat.service
+sed -i "s~##CLOUDID##~$cloud_id~" nsx-stat.service
 cp nsx-stat.service /etc/systemd/system/
 systemctl daemon-reload
 sed -i "s~/##WORKINGDIR##~$install_path~" $install_path/telegraf.conf

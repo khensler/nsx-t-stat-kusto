@@ -3,6 +3,7 @@ Description=NSX-T Stats Service
 After=multi-user.target
 
 [Service]
+Environment="##CLOUDID##"
 Type=simple
 Restart=always
 WorkingDirectory=##WORKINGDIR##
