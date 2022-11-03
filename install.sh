@@ -40,4 +40,4 @@ systemctl daemon-reload
 sed -i "s~/##WORKINGDIR##~$install_path~" $install_path/telegraf.conf
 cp $install_path/telegraf.conf /etc/telegraf/
 systemctl start telegraf
-systemctl start nsx-stats
+systemctl start nsx-stat
