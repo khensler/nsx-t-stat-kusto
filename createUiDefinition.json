@@ -16,9 +16,11 @@
                 }
              }
         },
-        "basics": [
+        "resourceTypes": [
+            "microsoft.resources/resourcegroups"
         ],
-        "steps": [ 
+        "basics": [],
+        "steps":[
             {
                 "name" : "privateCloud",
                 "label": "Private Cloud Selection",
@@ -123,7 +125,6 @@
             "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
             "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
             "customData" : "[concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id)]"
-         },
-        "resourceTypes": [ ]
+        }
     }
 }
