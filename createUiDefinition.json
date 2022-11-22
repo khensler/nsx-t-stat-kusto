@@ -96,35 +96,20 @@
             ]
         },
         "outputs": {
-            "parameters": {
-                "Prefix": "[steps('basics').avsDeploymentPrefix]",
-                "Location": "[steps('basics').avsDeploymentScope.location.name]",
-                "DeployMonitoring": "[steps('Monitoring').DeployMonitoring]",
-                "DeployWorkbook": "[steps('Monitoring').AVSWorkbook.DeployAVSWorkbook]",
-                "DeployDashboard": "[steps('Monitoring').AVSDashboard.DeployDashboard]",
-                "DeployServiceHealth": "[steps('Monitoring').AVSDashboard.DeployServiceHealth]",
-                "DeployMetricAlerts": "[steps('Monitoring').AVSDashboard.DeployAVSAlerts]",
-                "PrivateCloudName": "[steps('Monitoring').MonitoringInputs.avsSelector.name]",
-                "PrivateCloudResourceId": "[steps('Monitoring').MonitoringInputs.avsSelector.id]",
-                "AlertEmails": "[steps('Monitoring').MonitoringInputs.ActionGroupEmails]",
-                "CPUUsageThreshold": "[steps('Monitoring').MonitoringInputs.cpuUsageThreshold]",
-                "MemoryUsageThreshold": "[steps('Monitoring').MonitoringInputs.memoryUsageThreshold]",
-                "StorageUsageThreshold": "[steps('Monitoring').MonitoringInputs.storageUsageThreshold]",
-                "DeployDiagnostics": "[steps('Diagnostics').DeployDiagnostics]",
-                "DeployAVSLogsWorkspace": "[steps('Diagnostics').Workspace.AVSLogCollection]",
-                "DiagnosticsPrivateCloudName": "[steps('Diagnostics').avsSelector2.name]",
-                "DiagnosticsPrivateCloudResourceId": "[steps('Diagnostics').avsSelector2.id]",
-                "DeployActivityLogDiagnostics": "[steps('Diagnostics').Workspace.ActivityLogCollection]",
-                "DeployAVSLogsStorage": "[steps('Diagnostics').StorageAccount.StorageLogCollection]",
-                "DeployWorkspace": "[steps('Diagnostics').Workspace.WorkspaceExists]",
-                "ExistingWorkspaceId": "[steps('Diagnostics').Workspace.existingWorkspaceSelector.id]",
-                "ExistingStorageAccountId": "[steps('Diagnostics').StorageAccount.existingStorageAccountSelector.id]",
-                "DeployStorageAccount": "[steps('Diagnostics').StorageAccount.StorageAccountExists]",
-                "StorageRetentionDays": "[steps('Diagnostics').StorageAccount.storageRetention]"
-            },
-            "kind": "Subscription",
-            "location": "[steps('basics').avsDeploymentScope.location.name]",
-            "subscriptionId": "[steps('basics').avsDeploymentScope.subscription.id]"
-        }
+            "privateCloud" : "[steps('privateCloud').privateCloudSelector]",
+            "virtualMachineName" : "[steps('virtualMachineName').virtualMachineName]",
+            "virtualMachineComputerName" : "[steps('virtualMachineName').virtualMachineName]",
+            "virtualMachineRG": "[resourceGroup().name]",
+            "location": "[location()]",
+            "osDiskType" : "Premium_LRS",
+            "osDiskDeleteOption" : "Delete",
+            "virtualMachineSize" :"Standard_DS1_v2",
+            "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
+            "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
+            "customData" : "[concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id)]",
+            "virtualNetworkId" :  "[concat('/subscriptions/',subscription().id , '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
+            "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
+            "networkInterfaceName" : "[guid()]"
+         }
     }
 }
