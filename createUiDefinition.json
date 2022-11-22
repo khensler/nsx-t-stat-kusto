@@ -96,6 +96,7 @@
             ]
         },
         "outputs": {
+            "parameters": {
             "privateCloud" : "[steps('privateCloud').privateCloudSelector]",
             "virtualMachineName" : "[steps('virtualMachineName').virtualMachineName]",
             "virtualMachineComputerName" : "[steps('virtualMachineName').virtualMachineName]",
@@ -110,6 +111,7 @@
             "virtualNetworkId" :  "[concat('/subscriptions/',subscription().id , '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
             "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
             "networkInterfaceName" : "[guid()]"
+            }
          }
     }
 }
