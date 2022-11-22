@@ -120,7 +120,7 @@
             "nicDeleteOption": "Delete",
             "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
             "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
-            "customData" : "[concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id)]",
+            "customData" : "[concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id)]"
          },
         "resourceTypes": [ ]
     }
