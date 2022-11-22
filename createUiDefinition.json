@@ -1,117 +1,129 @@
 {
-    "$schema": "<relative path to createFormUI.schema.json>",
-    "view": {
-        "kind": "Form",
-        "properties": {
-            "title": "AVS SDDC and NSX Monitoring",
-            "steps": [
-                {
-                    "name" : "privateCloud",
-                    "label": "Private Cloud Selection",
-                    "elements": [
-                        {
-                            "name": "privateCloudSelector",
-                            "type": "Microsoft.Solutions.ResourceSelector",
-                            "label": "Select AVS Private Cloud",
-                            "resourceType": "Microsoft.AVS/privateClouds",
-                            "options": {
-                              "filter": {
-                                "subscription": "onBasics"
-                              }
-                            }
-                          }
-                    ]
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": true,
+            "basics": {
+                "description": "Azure VMware Solution metrics collection deployment",
+                "resourceGroup": {
+                    "allowExisting": true
                 },
-                {
-                    "name" : "virtualNetwork",
-                    "label": "Virtual Network Selection",
-                    "elements": [
-                        {
-                            "name": "virtualNetwork",
-                            "type": "Microsoft.Network.VirtualNetworkCombo",
-                            "label": {
-                                "virtualNetwork": "Select existing virtual network with access to the Private Cloud",
-                                "subnets": "Subnet"
-                            },
-                            "options": {
-                                "hideExisting": false,
-                                "filter": {
-                                    "subscription": "onBasics",
-                                    "location": "onBasics"
-                              }
-                            },
-                            "constraints": {
-                                "minAddressPrefixSize": "/30"
-                            },
-                            "subnets": {
-                                "subnet1": {
-                                  "label": "Subnet",
-                                  "defaultValue": {
-                                    "name": "Default"
-                                  },
-                                  "constraints": {
-                                    "minAddressPrefixSize": "/30",
-                                    "minAddressCount": 1,
-                                    "requireContiguousAddresses": true
-                                  }
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name" : "virtualMachineName",
-                    "label": "Virtual Machine",
-                    "elements": [
-                        {
-                            "name": "virtualMachineName",
-                            "type": "Microsoft.Common.TextBox",
-                            "label": "Enter a name for the Virtual Machine"
-                        },
-                        {
-                            "name" :"virtualMachineUserName",
-                            "type": "Microsoft.Common.TextBox",
-                            "label": "Enter a username for the VM"
-                        },
-                        {
-                            "name" :"virtualMachinePassword",
-                            "type": "Microsoft.Common.PasswordBox",
-                            "label": {
-                                "password": "Password",
-                                "confirmPassword": "Confirm password"
-                            },
-                            "toolTip": "",
-                            "constraints": {
-                                "required": true,
-                                "regex": "^[a-zA-Z0-9]{8,}$",
-                                "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
-                            },
-                            "options": {
-                                "hideConfirmation": false
-                            },
-                            "visible": true
-                        }
-                    ]
+                "location": {
+                    "label": "Region to deploy",
+                    "visible": true
                 }
-            ]
+             }
         },
+        "basics": [
+        ],
+        "steps": [ 
+            {
+                "name" : "privateCloud",
+                "label": "Private Cloud Selection",
+                "elements": [
+                    {
+                        "name": "privateCloudSelector",
+                        "type": "Microsoft.Solutions.ResourceSelector",
+                        "label": "Select AVS Private Cloud",
+                        "resourceType": "Microsoft.AVS/privateClouds",
+                        "options": {
+                          "filter": {
+                            "subscription": "onBasics"
+                          }
+                        }
+                      }
+                ]
+            },
+            {
+                "name" : "virtualNetwork",
+                "label": "Virtual Network Selection",
+                "elements": [
+                    {
+                        "name": "virtualNetwork",
+                        "type": "Microsoft.Network.VirtualNetworkCombo",
+                        "label": {
+                            "virtualNetwork": "Select existing virtual network with access to the Private Cloud",
+                            "subnets": "Subnet"
+                        },
+                        "options": {
+                            "hideExisting": false,
+                            "filter": {
+                                "subscription": "onBasics",
+                                "location": "onBasics"
+                          }
+                        },
+                        "constraints": {
+                            "minAddressPrefixSize": "/30"
+                        },
+                        "subnets": {
+                            "subnet1": {
+                              "label": "Subnet",
+                              "defaultValue": {
+                                "name": "Default"
+                              },
+                              "constraints": {
+                                "minAddressPrefixSize": "/30",
+                                "minAddressCount": 1,
+                                "requireContiguousAddresses": true
+                              }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name" : "virtualMachineName",
+                "label": "Virtual Machine",
+                "elements": [
+                    {
+                        "name": "virtualMachineName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Enter a name for the Virtual Machine"
+                    },
+                    {
+                        "name" :"virtualMachineUserName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Enter a username for the VM"
+                    },
+                    {
+                        "name" :"virtualMachinePassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-zA-Z0-9]{8,}$",
+                            "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    }
+                ]
+            }
+        ],
         "outputs": {
-            "parameters": {
-            "privateCloud" : "[steps('privateCloud').privateCloudSelector]",
+            "location": "[location()]",
+            "networkInterfaceName" : "[guid()]",
+            "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
+            "virtualNetworkId" :  "[concat('/subscriptions/',subscription().id , '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
             "virtualMachineName" : "[steps('virtualMachineName').virtualMachineName]",
             "virtualMachineComputerName" : "[steps('virtualMachineName').virtualMachineName]",
             "virtualMachineRG": "[resourceGroup().name]",
-            "location": "[location()]",
             "osDiskType" : "Premium_LRS",
             "osDiskDeleteOption" : "Delete",
             "virtualMachineSize" :"Standard_DS1_v2",
+            "nicDeleteOption": "Delete",
             "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
             "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
             "customData" : "[concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id)]",
-            "virtualNetworkId" :  "[concat('/subscriptions/',subscription().id , '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
-            "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
-            "networkInterfaceName" : "[guid()]"
-            }
-         }
+         },
+        "resourceTypes": [ ]
     }
 }
