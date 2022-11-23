@@ -112,7 +112,6 @@
         },
         "outputs": {
             "parameters": {
-                "subscriptionId" : "[steps('basics').resourceScope.subscription.id]",
                 "location": "[steps('basics').resourceScope.location.name]",
                 "networkInterfaceName" : "[guid()]",
                 "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
@@ -127,7 +126,10 @@
                 "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
                 "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
                 "customData" : "[concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id)]"
-            }
+            },
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
          }
     }
 }
