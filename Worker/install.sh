@@ -56,7 +56,7 @@ sed -i "s~##CLOUDID##~$cloud_id~" nsx-stat.service
 cp nsx-stat.service /etc/systemd/system/
 systemctl daemon-reload
 sed -i "s~/##WORKINGDIR##~$install_path~" $install_path/telegraf.conf
-sed -i "s~/##WORKINGDIR##~$install_path~" $install_path/crontab.conf
+sed -i "s~/##WORKINGDIR##~$install_path~" $install_path/crontab
 crontab crontab
 cp $install_path/telegraf.conf /etc/telegraf/
 systemctl enable nsx-stat.service
