@@ -177,7 +177,9 @@
             "apiVersion": "2019-09-01",
             "name": "installSoftware",
             "dependsOn": [
+                 "[parameters('virtualMachineName')]",
                 "assignContributorRoleToPrivateCloud"
+
             ],
             "properties": {
                 "mode": "Incremental",
@@ -194,7 +196,8 @@
                                 "source": {
                                     "script": "git clone -b azure-custom-metrics https://github.com/khensler/nsx-t-stat-kusto /root/nsx-t-stat-kusto && /root/nsx-t-stat-kusto/Worker/install.sh"
                                 }
-                            }
+                            },
+                            "scope": "[parameters('virtualMachineName').id]"
                         }
                      ]
                 }
