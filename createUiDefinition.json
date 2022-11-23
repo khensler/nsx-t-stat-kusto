@@ -112,6 +112,7 @@
         },
         "outputs": {
             "parameters": {
+                "subscriptionId" : "[steps('basics').resourceScope.subscription.id]",
                 "location": "[steps('basics').resourceScope.location.name]",
                 "networkInterfaceName" : "[guid()]",
                 "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
