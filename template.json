@@ -145,6 +145,7 @@
                         {
                             "apiVersion": "2021-03-01",
                             "name": "[parameters('virtualMachineName')]",
+                            "type": "Microsoft.Compute/virtualMachines",
                              "properties": {
                                 "osProfile": {
                                     "customData": "[parameters('customData')]"
