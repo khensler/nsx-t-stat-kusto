@@ -139,7 +139,7 @@
             "dependsOn": [
                 "[parameters('virtualMachineName')]"
             ],
-            "resourceGroup" : "[split(parameters('privateCloudId'), '/')[3]]",
+            "resourceGroup" : "[split(parameters('privateCloudId'), '/')[4]]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
