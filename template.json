@@ -42,7 +42,7 @@
             "type": "secureString"
         },
         "customData": {
-            "type": "string"
+            "type": "secureString"
         }
     },
     "variables": {
@@ -125,6 +125,36 @@
                     }
                 }
             }
+        },
+        {
+            "apiVersion": "2020-06-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "updateCustomData",
+            "dependsOn": [
+                "[parameters('virtualMachineName')]"
+            ],
+             "properties": {
+                "mode": "Incremental",
+                "parameters": {},
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.1",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2021-03-01",
+                            "name": "[parameters('virtualMachineName')]",
+                             "properties": {
+                                "osProfile": {
+                                    "customData": "[parameters('customData')]"
+                                }
+                             }
+                        }
+                    ],
+                    "outputs": {}
+                }
+             }
         }
     ],
     "outputs": {
