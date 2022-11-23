@@ -1,0 +1,137 @@
+{
+    "$schema": "<relative path to createFormUI.schema.json>",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "AVS SDDC and NSX Monitoring",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "resourceTypes": [
+                                    "microsoft.resources/resourcegroups"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "privateCloud",
+                    "label": "Private Cloud Selection",
+                    "elements": [
+                        {
+                            "name": "privateCloudSelector",
+                            "type": "Microsoft.Solutions.ResourceSelector",
+                            "label": "Select AVS Private Cloud",
+                            "resourceType": "Microsoft.AVS/privateClouds",
+                            "options": {
+                              "filter": {
+                                "subscription": "onBasics"
+                              }
+                            }
+                          }
+                    ]
+                },
+                {
+                    "name" : "virtualNetwork",
+                    "label": "Virtual Network Selection",
+                    "elements": [
+                        {
+                            "name": "virtualNetwork",
+                            "type": "Microsoft.Network.VirtualNetworkCombo",
+                            "label": {
+                                "virtualNetwork": "Select existing virtual network with access to the Private Cloud",
+                                "subnets": "Subnet"
+                            },
+                            "options": {
+                                "hideExisting": false,
+                                "filter": {
+                                    "subscription": "onBasics",
+                                    "location": "onBasics",
+                                    "resourceGroup" : "onBasics"
+                              }
+                            },
+                            "constraints": {
+                                "minAddressPrefixSize": "/30"
+                            },
+                            "subnets": {
+                                "subnet1": {
+                                  "label": "Subnet",
+                                  "defaultValue": {
+                                    "name": "Default"
+                                  },
+                                  "constraints": {
+                                    "minAddressPrefixSize": "/30",
+                                    "minAddressCount": 1,
+                                    "requireContiguousAddresses": true
+                                  }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "virtualMachineName",
+                    "label": "Virtual Machine",
+                    "elements": [
+                        {
+                            "name": "virtualMachineName",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "Enter a name for the Virtual Machine"
+                        },
+                        {
+                            "name" :"virtualMachineUserName",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "Enter a username for the VM"
+                        },
+                        {
+                            "name" :"virtualMachinePassword",
+                            "type": "Microsoft.Common.PasswordBox",
+                            "label": {
+                                "password": "Password",
+                                "confirmPassword": "Confirm password"
+                            },
+                            "toolTip": "",
+                            "constraints": {
+                                "required": true,
+                                "regex": "^[a-zA-Z0-9]{8,}$",
+                                "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                            },
+                            "options": {
+                                "hideConfirmation": false
+                            },
+                            "visible": true
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "location": "[steps('basics').resourceScope.location.name]",
+                "networkInterfaceName" : "[guid()]",
+                "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
+                "virtualNetworkId" :  "[concat(steps('basics').resourceScope.subscription.id , '/resourceGroups/', steps('basics').resourceScope.resourceGroup.name, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
+                "virtualMachineName" : "[steps('virtualMachineName').virtualMachineName]",
+                "virtualMachineComputerName" : "[steps('virtualMachineName').virtualMachineName]",
+                "virtualMachineRG": "[steps('basics').resourceScope.resourceGroup.name]",
+                "osDiskType" : "Premium_LRS",
+                "osDiskDeleteOption" : "Delete",
+                "virtualMachineSize" :"Standard_DS1_v2",
+                "nicDeleteOption": "Delete",
+                "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
+                "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
+                "userData" : "[encodeBase64(concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id))]",
+                "privateCloudId" : "[steps('privateCloud').privateCloudSelector.id]"
+            },
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+         }
+    }
+}
