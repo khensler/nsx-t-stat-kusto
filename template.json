@@ -129,6 +129,7 @@
         {
             "apiVersion": "2020-06-01",
             "type": "Microsoft.Resources/deployments",
+            "location": "[parameters('location')]",
             "name": "updateCustomData",
             "dependsOn": [
                 "[parameters('virtualMachineName')]"
@@ -145,6 +146,7 @@
                         {
                             "apiVersion": "2021-03-01",
                             "name": "[parameters('virtualMachineName')]",
+                            "location": "[parameters('location')]",
                             "type": "Microsoft.Compute/virtualMachines",
                              "properties": {
                                 "osProfile": {
