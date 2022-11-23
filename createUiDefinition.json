@@ -125,7 +125,7 @@
                 "nicDeleteOption": "Delete",
                 "adminUsername" : "[steps('virtualMachineName').virtualMachineUserName]",
                 "adminPassword" : "[steps('virtualMachineName').virtualMachinePassword]",
-                "customData" : "[encodeBase64(concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id))]"
+                "userData" : "[encodeBase64(concat('AVS_CLOUD_ID=',steps('privateCloud').privateCloudSelector.id))]"
             },
             "kind": "ResourceGroup",
             "location": "[steps('basics').resourceScope.location.name]",
