@@ -130,7 +130,27 @@
                         "enabled": true
                     }
                 }
-            }
+            },
+            "resources": [
+                {
+                    "type": "Extensions",
+                    "apiVersion": "2019-03-01",
+                    "name": "config-app",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[parameters('virtualMachineName')]","assignContributorRoleToPrivateCloud"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Extensions",
+                        "type": "CustomScript",
+                        "typeHandlerVersion": "2.1",
+                        "autoUpgradeMinorVersion": true,
+                        "protectedSettings": {
+                            "commandToExecute": "git clone -b azure-custom-metrics https://github.com/khensler/nsx-t-stat-kusto /root/nsx-t-stat-kusto && sudo /root/nsx-t-stat-kusto/Worker/install.sh"
+                        }
+                    }
+                }
+            ]
         },
         {
             "type": "Microsoft.Resources/deployments",
@@ -177,9 +197,7 @@
             "apiVersion": "2019-09-01",
             "name": "installSoftware",
             "dependsOn": [
-                 "[parameters('virtualMachineName')]",
-                "assignContributorRoleToPrivateCloud"
-
+                 "[parameters('virtualMachineName')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -195,9 +213,10 @@
                             "properties": {
                                 "source": {
                                     "script": "git clone -b azure-custom-metrics https://github.com/khensler/nsx-t-stat-kusto /root/nsx-t-stat-kusto && /root/nsx-t-stat-kusto/Worker/install.sh"
-                                }
+                                },
+                                "timeoutInSeconds": "600"
                             },
-                            "scope": "[parameters('virtualMachineName').id]"
+                            "scope": "[reference(parameters('virtualMachineName'), '2022-03-01', 'Full').resourceId]"
                         }
                      ]
                 }
