@@ -150,7 +150,7 @@
                             "name": "041f83c4-78ca-5109-a1eb-9224c3fcc15e",
                             "properties": {
                                 "roleDefinitionId": "[concat(parameters('privateCloudId'), '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c')]",
-                                "principalId": "[reference(parameters('virtualMachineName'), '2018-11-30').principalId]",
+                                "principalId": "[reference(parameters('virtualMachineName'), '2022-03-01').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             },
                             "scope": "[parameters('privateCloudId')]"
