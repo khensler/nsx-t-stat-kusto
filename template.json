@@ -135,10 +135,12 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-09-01",
-            "name": "assignContributorRoleToPrivateCloud",
+            "name": "assignRoleToPrivateCloud",
             "dependsOn": [
                 "[parameters('virtualMachineName')]"
-            ],"properties": {
+            ],
+            "resourceGroup" : "[split(parameters('privateCloudId'), '/')[3]]",
+            "properties": {
                 "mode": "Incremental",
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -147,10 +149,21 @@
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2020-04-01-preview",
-                            "name": "041f83c4-78ca-5109-a1eb-9224c3fcc15e",
+                            "name": "contributor",
                             "properties": {
                                 "roleDefinitionId": "[concat(parameters('privateCloudId'), '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c')]",
-                                "principalId": "[reference(parameters('virtualMachineName'), '2022-03-01').identity.principalId]",
+                                "principalId": "[reference(parameters('virtualMachineName'), '2022-03-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                            },
+                            "scope": "[parameters('privateCloudId')]"
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "metricsPublisher",
+                            "properties": {
+                                "roleDefinitionId": "[concat(parameters('privateCloudId'), '/providers/Microsoft.Authorization/roleDefinitions/3913510d-42f4-4e42-8a64-420c390055eb')]",
+                                "principalId": "[reference(parameters('virtualMachineName'), '2022-03-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             },
                             "scope": "[parameters('privateCloudId')]"
