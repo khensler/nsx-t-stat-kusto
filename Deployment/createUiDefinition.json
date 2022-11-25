@@ -46,15 +46,19 @@
                             "type": "Microsoft.Network.VirtualNetworkCombo",
                             "label": {
                                 "virtualNetwork": "Select existing virtual network with access to the Private Cloud",
-                                "subnets": "Subnet"
+                                "subnets": "Select an existing subne"
+                            },
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.resourceGroupId]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "toolTip": {
+                                "virtualNetwork": "Creating a new VNet is not allowed, attempts to do so will fail",
+                                "subnets": "Must select an existing subnet"
                             },
                             "options": {
-                                "hideExisting": false,
-                                "filter": {
-                                    "subscription": "onBasics",
-                                    "location": "onBasics",
-                                    "resourceGroup" : "onBasics"
-                              }
+                                "hideExisting": false
                             },
                             "constraints": {
                                 "minAddressPrefixSize": "/30"
@@ -99,8 +103,8 @@
                             "toolTip": "",
                             "constraints": {
                                 "required": true,
-                                "regex": "^[a-zA-Z0-9]{8,}$",
-                                "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                                "regex": "^(?=.*[A-Z])(?=.*[.!@#$%^&*()-_=+])(?=.*[0-9])(?=.*[a-z]).{8,40}$",
+                                "validationMessage": "Password must be at least 8 characters long, and contain upper case, lower case, number and symbol"
                             },
                             "options": {
                                 "hideConfirmation": false
