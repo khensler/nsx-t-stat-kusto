@@ -119,7 +119,7 @@
                 "location": "[steps('basics').resourceScope.location.name]",
                 "networkInterfaceName" : "[guid()]",
                 "subnetName": "[steps('virtualNetwork').virtualNetwork.subnets.subnet1.name]",
-                "virtualNetworkId" :  "[concat(steps('basics').resourceScope.subscription.id , '/resourceGroups/', steps('virtualNetwork').virtualNetwork.resourceGroup.name, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
+                "virtualNetworkId" :  "[concat(steps('basics').resourceScope.subscription.id , '/resourceGroups/', steps('virtualNetwork').virtualNetwork.resourceGroup, '/providers/Microsoft.Network/virtualNetworks/', steps('virtualNetwork').virtualNetwork.name)]",
                 "virtualMachineName" : "[steps('virtualMachineName').virtualMachineName]",
                 "virtualMachineComputerName" : "[steps('virtualMachineName').virtualMachineName]",
                 "virtualMachineRG": "[steps('basics').resourceScope.resourceGroup.name]",
