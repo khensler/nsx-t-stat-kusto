@@ -4,6 +4,7 @@
         "kind": "Form",
         "properties": {
             "title": "AVS SDDC and NSX Monitoring",
+            "isWizard": true,
             "steps": [
                 {
                     "name": "basics",
